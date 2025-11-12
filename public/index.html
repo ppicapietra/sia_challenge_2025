@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="https://www.siainteractive.com/favicon.ico">
+  <link rel="apple-touch-icon" href="https://www.siainteractive.com/styles/favicons/apple-touch-icon.png">
+  <title>SIA Challenge 2025</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      /* Dynamic viewport height for mobile */
+      padding: 10px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 20px);
+      height: calc(100dvh - 20px);
+      /* Dynamic viewport height for mobile */
+    }
+
+    .status-bar {
+      padding: 10px 20px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .status {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status.connected {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .channels-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Channel 1 - Video Section (60%) */
+    .channel-1 {
+      flex: 0 0 60%;
+      display: flex;
+      flex-direction: column;
+      border-bottom: 3px solid #667eea;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .channel-header {
+      padding: 10px 20px;
+      background: rgba(102, 126, 234, 0.1);
+      border-bottom: 1px solid #e0e0e0;
+      font-weight: 600;
+      color: #333;
+      flex-shrink: 0;
+    }
+
+    .video-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #000;
+      overflow: hidden;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .video-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+      padding: 15px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .video-wrapper:hover .video-controls {
+      opacity: 1;
+    }
+
+    .video-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .video-controls button {
+      background: rgba(102, 126, 234, 0.9);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 25px;
+    }
+
+    .video-controls button:hover {
+      background: rgba(102, 126, 234, 1);
+      transform: scale(1.1);
+    }
+
+    .video-controls button:disabled {
+      background: rgba(204, 204, 204, 0.5);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .seek-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .seek-button {
+      position: relative;
+    }
+
+    .seek-badge {
+      position: absolute;
+      top: 10px;
+      right: 11px;
+      color: white;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .seek-button:disabled .seek-badge {
+      background: rgba(204, 204, 204, 0.7);
+      border-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Styled Range Input */
+    .video-progress-container {
+      flex: 1;
+      position: relative;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .video-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: #667eea;
+      border-radius: 3px;
+      transition: width 0.1s linear;
+    }
+
+    .video-progress-input {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+    }
+
+    .video-progress-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      /* width: 14px;
+      height: 14px;
+      background: #667eea;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s; */
+    }
+
+    /* .video-progress-input::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: #5568d3;
+    } */
+
+    .video-progress-input::-moz-range-thumb {
+      appearance: none;
+
+      /* width: 14px;
+      height: 14px;
+      background: #667eea;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s; */
+    }
+
+    /* .video-progress-input::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      background: #5568d3;
+    } */
+
+    .video-progress-input:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    /* Channel 2 - Weather Section (40%) */
+    .channel-2 {
+      flex: 0 0 40%;
+      display: flex;
+      flex-direction: column;
+      background: #f8f9fa;
+      overflow-y: auto;
+    }
+
+    .weather-content {
+      flex: 1;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .weather-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .weather-location {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .weather-temp {
+      font-size: 64px;
+      font-weight: 700;
+      color: #667eea;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .weather-temp-unit {
+      font-size: 32px;
+      vertical-align: top;
+    }
+
+    .weather-details {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .weather-detail {
+      text-align: center;
+    }
+
+    .weather-detail-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .weather-detail-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .loading {
+      text-align: center;
+      color: #999;
+      padding: 40px;
+    }
+
+    /* Media queries */
+    @media (max-width: 768px) {
+      .container {
+        height: calc(100vh - 10px);
+        height: calc(100dvh - 10px);
+        /* Dynamic viewport height for mobile */
+        padding: 0;
+      }
+
+      .channels-container {
+        flex-direction: column;
+      }
+
+      .channel-1 {
+        flex: 0 0 65%;
+        min-height: 200px;
+      }
+
+      .channel-2 {
+        flex: 0 0 35%;
+      }
+
+      .video-controls {
+        flex-wrap: wrap;
+        padding: 15px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+      }
+
+      .seek-controls {
+        margin-left: 0;
+        justify-content: center;
+      }
+
+      .weather-temp {
+        font-size: 48px;
+      }
+
+      .weather-location {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+      }
+
+      .container {
+        border-radius: 8px;
+      }
+
+      .channel-1 {
+        flex: 0 0 65%;
+      }
+
+      .channel-2 {
+        flex: 0 0 35%;
+      }
+
+      .weather-content {
+        padding: 20px;
+      }
+
+      .weather-card {
+        padding: 20px;
+      }
+
+      .weather-temp {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div x-data="channelApp()" class="container">
+    <!-- Channels Container -->
+    <div class="channels-container">
+      <!-- Channel 1: Video -->
+      <div class="channel-1">
+        <div class="video-wrapper" @click.stop="toggleVideoPlayPause()">
+          <video muted autoplay playsinline loop x-ref="videoElement" :src="channel1Data?.metadata?.video_url"
+            @loadedmetadata="onVideoLoaded()" @timeupdate="onVideoTimeUpdate()" @play="onVideoPlayEvent()"
+            @pause="onVideoPauseEvent()" @seeking="onVideoSeeking()" @seeked="onVideoSeeked()">
+            Tu navegador no soporta el elemento de video.
+          </video>
+          <div class="video-controls">
+            <!-- Progress Bar -->
+            <div class="video-progress-container" @click.stop="seekToPosition($event)"
+              @touchstart.stop="seekToPositionTouch($event)">
+              <div class="video-progress-bar" :style="`width: ${videoProgress}%`"></div>
+              <input type="range" class="video-progress-input" min="0" max="100" step="0.1" :value="videoProgress"
+                @input.stop="onProgressInput($event)" @mousedown.stop="onProgressMouseDown()"
+                @mouseup.stop="onProgressMouseUp()" @touchstart.stop="onProgressTouchStart($event)"
+                @touchmove.stop="onProgressTouchMove($event)" @touchend.stop="onProgressTouchEnd($event)"
+                :disabled="!connected || !channel1Data || !videoDuration" />
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="video-controls-row">
+              <button @click.stop="toggleVideoPlayPause()" :disabled="!connected || !channel1Data" title="Play/Pause">
+                <i
+                  :class="channel1Data?.metadata?.video_status === 'playing' ? 'fa-solid fa-pause' : 'fa-solid fa-play'"></i>
+              </button>
+              <div class="seek-controls">
+                <button @click.stop="seekBackward()" :disabled="!connected || !channel1Data" title="Rewind 10s"
+                  class="seek-button">
+                  <i class="fa-solid fa-rotate-left"></i>
+                  <span class="seek-badge">10</span>
+                </button>
+                <button @click.stop="seekForward()" :disabled="!connected || !channel1Data" title="Forward 10s"
+                  class="seek-button">
+                  <i class="fa-solid fa-rotate-right"></i>
+                  <span class="seek-badge">10</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Channel 2: Weather -->
+      <div class="channel-2">
+        <div class="weather-content">
+          <template x-if="channel2Data && !channel2Data.metadata.error_message">
+            <div class="weather-card">
+              <div class="weather-location" x-text="channel2Data.metadata.location"></div>
+              <div class="weather-temp">
+                <span x-text="channel2Data.metadata.temperature_celcius"></span>
+                <span class="weather-temp-unit">°C</span>
+              </div>
+              <div class="weather-details">
+                <div class="weather-detail">
+                  <div class="weather-detail-label">Humidity</div>
+                  <div class="weather-detail-value" x-text="channel2Data.metadata.humidity + '%'"></div>
+                </div>
+              </div>
+            </div>
+          </template>
+          <template x-if="channel2Data && channel2Data.metadata.error_message">
+            <div class="weather-card">
+              <div class="weather-location" x-text="channel2Data.metadata.error_message"></div>
+            </div>
+          </template>
+          <template x-if="!channel2Data || channel2Data.metadata.error_message">
+            <div class="loading">Loading weather data...</div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="client.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+</body>
+
+</html>
