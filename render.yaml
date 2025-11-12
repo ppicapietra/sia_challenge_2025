@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sia-challenge-2025
+    name: sia_challenge_2025
     runtime: node
     plan: free
     buildCommand: npm install && npm run build
